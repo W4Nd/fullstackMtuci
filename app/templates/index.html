@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="welcome">
+    <h2>Добро пожаловать!</h2>
+    <p>Добавляйте напоминания о приеме лекарств и никогда не забывайте их принимать.</p>
+    
+    <div class="add-reminder-form">
+        <h3>Добавить новое напоминание</h3>
+        <form id="reminderForm">
+            <div class="form-group">
+                <label for="medicationName">Название лекарства:</label>
+                <input type="text" id="medicationName" name="medication_name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="dosage">Дозировка:</label>
+                <input type="text" id="dosage" name="dosage" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="time">Время приема:</label>
+                <input type="time" id="time" name="time" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Дни недели:</label>
+                <div class="days-checkbox">
+                    {% for day, name in [('0', 'Пн'), ('1', 'Вт'), ('2', 'Ср'), ('3', 'Чт'), ('4', 'Пт'), ('5', 'Сб'), ('6', 'Вс')] %}
+                    <label>
+                        <input type="checkbox" name="days" value="{{ day }}"> {{ name }}
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <button type="submit">Добавить напоминание</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
