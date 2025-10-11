@@ -4,15 +4,6 @@ from app.models import Reminder, Medication
 
 bp = Blueprint('main', __name__)
 
-@bp.route('/')
-def index():
-    return render_template('index.html')
-
-@bp.route('/reminders')
-def reminders():
-    reminders_list = load_reminders()
-    return render_template('reminders.html', reminders=reminders_list)
-
 @bp.route('/api/reminders', methods=['GET'])
 def get_reminders():
     reminders_list = load_reminders()
