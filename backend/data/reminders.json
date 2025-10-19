@@ -2,39 +2,18 @@
   {
     "id": 1,
     "medication": {
-      "name": "цитрамон",
-      "dosage": "2 таблетки"
+      "name": "лала",
+      "dosage": "1шт"
     },
-    "time": "13:30",
+    "time": "00:20",
     "days": [
       0,
-      2,
-      4
-    ],
-    "is_active": true
-  },
-  {
-    "id": 2,
-    "medication": {
-      "name": "шипучка",
-      "dosage": "3 таблетки"
-    },
-    "time": "06:16",
-    "days": [
-      1
-    ],
-    "is_active": true
-  },
-  {
-    "id": 3,
-    "medication": {
-      "name": "валидол",
-      "dosage": "1 таблетка"
-    },
-    "time": "17:30",
-    "days": [
       1,
-      5
+      2,
+      3,
+      4,
+      5,
+      6
     ],
     "is_active": true
   }
