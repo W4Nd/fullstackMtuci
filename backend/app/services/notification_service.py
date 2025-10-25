@@ -83,7 +83,12 @@ class NotificationService:
     
     def stop_scheduler(self):
         """Останавливает планировщик"""
+        if not self.is_running:
+            return
+    
         self.is_running = False
+        schedule.clear()  # Очищаем все запланированные задачи
+    
         if self.thread:
-            self.thread.join(timeout=5)
-        logger.info('Notification service stopped')
+            self.thread.join(timeout=3)  # Ждем завершения потока (макс 3 сек)
+            print('🔔 Служба уведомлений остановлена')

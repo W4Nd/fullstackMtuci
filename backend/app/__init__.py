@@ -4,6 +4,9 @@ from dotenv import load_dotenv
 from flask_cors import CORS
 import logging
 from logging.handlers import RotatingFileHandler
+import sys
+import atexit
+import signal
 
 load_dotenv()
 
@@ -30,6 +33,9 @@ def create_app():
     from app.api import bp as api_bp
     app.register_blueprint(api_bp, url_prefix='/api/v1')
     
+    from app.api.auth import bp as auth_bp
+    app.register_blueprint(auth_bp, url_prefix='/api/v1')
+    
     # Регистрация обработчиков ошибок
     from app.errors.handlers import register_error_handlers
     register_error_handlers(app)
@@ -38,6 +44,21 @@ def create_app():
     from app.services.notification_service import NotificationService
     notification_service = NotificationService()
     notification_service.start_scheduler()
+    
+    def shutdown_handler(signal_num=None, frame=None):
+        """Обработчик завершения работы"""
+        print('\n🔴 Остановка приложения...')
+        notification_service.stop_scheduler()
+        print('✅ Приложение корректно остановлено')
+        sys.exit(0)
+        
+    signal.signal(signal.SIGINT, shutdown_handler)   # Ctrl+C
+    signal.signal(signal.SIGTERM, shutdown_handler)  # Сигнал завершения
+    
+    # Регистрируем обработчик для atexit (на всякий случай)
+    atexit.register(shutdown_handler)
+    
+    return app
     
     # Health check
     @app.route('/health')
