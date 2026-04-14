@@ -7,7 +7,6 @@ on:
     branches: [ "main", "master" ]
 
 jobs:
-  # 1. Линтеры и Тесты
   test-and-lint:
     runs-on: ubuntu-latest
     services:
@@ -28,13 +27,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Backend
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - name: Install backend deps
-        working-directory: ./backend
+        working-directory: ./
         run: pip install -r requirements.txt pytest ruff
       - name: Lint backend
         working-directory: ./backend
@@ -46,7 +44,6 @@ jobs:
           JWT_SECRET_KEY: test_secret
         run: pytest tests/ -v
 
-      # Frontend
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -61,9 +58,8 @@ jobs:
         run: npm run lint
       - name: Test frontend
         working-directory: ./frontend
-        run: npm run test:run # Проверь команду в package.json, возможно 'npm test'
+        run: npm run test:run 
 
-  # 2. Сборка образов
   build-images:
     needs: test-and-lint
     runs-on: ubuntu-latest
@@ -75,6 +71,5 @@ jobs:
       - name: Build Frontend
         run: docker build -t frontend:latest ./frontend
       
-      # 3. Деплой (эмуляция)
       - name: Deploy
         run: echo "Images built successfully. Ready for production deploy."
