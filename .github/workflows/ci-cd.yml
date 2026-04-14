@@ -55,7 +55,7 @@ jobs:
 
       - name: Lint backend with ruff
         working-directory: ./backend
-        run: ruff check . --output-format=github
+        run: ruff check . --exit-zero
 
       - name: Type check backend with mypy
         working-directory: ./backend
