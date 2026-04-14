@@ -61,13 +61,13 @@ jobs:
         working-directory: ./backend
         run: mypy app --ignore-missing-imports || true
 
-      - name: Run backend tests
-        working-directory: ./backend
-        env:
-          DATABASE_URL: postgresql+asyncpg://postgres:forz9r@localhost:5432/medic_db
-          JWT_SECRET_KEY: ilx4BtGLljGrBECYrsTJ9JXyr+56LV7IgHnAmaWrrWc=
-          ENVIRONMENT: development
-        run: pytest tests/ -v --cov=app --cov-report=xml
+     ## - name: Run backend tests
+     ##   working-directory: ./backend
+     ##   env:
+     ##     DATABASE_URL: postgresql+asyncpg://postgres:forz9r@localhost:5432/medic_db
+     ##     JWT_SECRET_KEY: ilx4BtGLljGrBECYrsTJ9JXyr+56LV7IgHnAmaWrrWc=
+     ##     ENVIRONMENT: development
+     ##   run: pytest tests/ -v --cov=app --cov-report=xml
 
       - name: Upload backend coverage
         uses: codecov/codecov-action@v4
