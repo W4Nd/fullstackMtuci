@@ -1,7 +1,6 @@
 import sys
 import os
 
-# Добавляем текущую директорию в путь
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 print("=== DEBUG IMPORTS ===")

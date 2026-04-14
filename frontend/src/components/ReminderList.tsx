@@ -10,7 +10,7 @@ interface ReminderListProps {
 const ReminderList: React.FC<ReminderListProps> = ({ reminders, onToggle, onDelete }) => {
   const dayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 
-  if (reminders.length === 0) {
+  if (!reminders || reminders.length === 0) {
     return (
       <div style={{ background: 'white', borderRadius: '8px', padding: '1.5rem', textAlign: 'center', boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }}>
         <p style={{ color: '#6b7280' }}>Нет добавленных напоминаний</p>

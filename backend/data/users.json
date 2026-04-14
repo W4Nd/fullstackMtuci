@@ -12,5 +12,33 @@
     "email": "test1@example.com",
     "password_hash": "$2b$12$BLyFlwLmZ7woIw2CkWz9b.ZL5vRxhgZrke.XhCwRAlTWl.AGvxfHa",
     "created_at": "2025-10-25T15:58:08.420314"
+  },
+  {
+    "id": 3,
+    "username": "testuser3",
+    "email": "test3@example.com",
+    "password_hash": "$2b$12$4s8W/2udzJN6lNcijj8ZzOInDTA57dlwyIoVxh6rdeyvcaKufqHeO",
+    "created_at": "2025-11-05T19:33:47.949372"
+  },
+  {
+    "id": 4,
+    "username": "gwault",
+    "email": "gwault@gmail.com",
+    "password_hash": "$2b$12$OMnVXbT3z2cdvZCVM1uKXODJ4nx2gWFsmfm16IWpaS6mSQ32D3QeS",
+    "created_at": "2025-11-06T11:48:09.789460"
+  },
+  {
+    "id": 5,
+    "username": "wand3r",
+    "email": "wand3r@gmail.com",
+    "password_hash": "$2b$12$fyjKzgVrL.dt9eY/CgtpX.30ovnlTQ6sOpr1OQUd2jhaell0.zvzm",
+    "created_at": "2025-11-17T13:45:31.694976"
+  },
+  {
+    "id": 6,
+    "username": "wand3rinho",
+    "email": "wand3rinho@test.com",
+    "password_hash": "$2b$12$19Oul/Yap2ZD5XNmu8niL.P45BPtmZ73A0nH55gyug4QI/OLB5S6C",
+    "created_at": "2025-11-17T14:30:17.029057"
   }
 ]

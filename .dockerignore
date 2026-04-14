@@ -1,0 +1,13 @@
+node_modules
+frontend
+htmlcov
+logs
+.git
+*.log
+.env
+.DS_Store
+__pycache__
+*.pyc
+.pytest_cache
+coverage.xml
+.DS_Store

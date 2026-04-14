@@ -1,115 +1,153 @@
-import json
-import os
-from datetime import datetime
 from app.models import User
+from app.database import db
 import logging
 
 logger = logging.getLogger(__name__)
 
-USERS_FILE = 'data/users.json'
-
 class UserRepository:
     
-    @staticmethod
-    def _ensure_data_file():
-        """Создает файл пользователей если его нет"""
-        if not os.path.exists(USERS_FILE):
-            os.makedirs(os.path.dirname(USERS_FILE), exist_ok=True)
-            with open(USERS_FILE, 'w', encoding='utf-8') as f:
-                json.dump([], f, indent=2)
+    def __init__(self, db):  
+        self.db = db
     
     @staticmethod
     def get_all():
         """Получить всех пользователей"""
-        UserRepository._ensure_data_file()
-        
         try:
-            with open(USERS_FILE, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                users = []
-                for item in data:
-                    user = User(
-                        id=item['id'],
-                        username=item['username'],
-                        email=item['email'],
-                        password_hash=item['password_hash'],
-                        created_at=item['created_at']
-                    )
-                    users.append(user)
-                return users
+            result = db.execute_query("SELECT * FROM users")
+            return [User.from_db(row) for row in result]
         except Exception as e:
             logger.error(f'Error loading users: {str(e)}')
             return []
     
     @staticmethod
+    def get_by_id(user_id: int):
+        """Найти пользователя по ID"""
+        try:
+            result = db.execute_query("SELECT * FROM users WHERE id = %s", (user_id,))
+            if result:
+                return User.from_db(result[0])
+            return None
+        except Exception as e:
+            logger.error(f'Error getting user by id: {str(e)}')
+            return None
+    
+    @staticmethod
     def get_by_username(username: str):
         """Найти пользователя по имени"""
-        users = UserRepository.get_all()
-        for user in users:
-            if user.username == username:
-                return user
-        return None
+        try:
+            result = db.execute_query("SELECT * FROM users WHERE username = %s", (username,))
+            if result:
+                return User.from_db(result[0])
+            return None
+        except Exception as e:
+            logger.error(f'Error getting user by username: {str(e)}')
+            return None
     
     @staticmethod
     def get_by_email(email: str):
         """Найти пользователя по email"""
-        users = UserRepository.get_all()
-        for user in users:
-            if user.email == email:
-                return user
-        return None
+        try:
+            result = db.execute_query("SELECT * FROM users WHERE email = %s", (email,))
+            if result:
+                return User.from_db(result[0])
+            return None
+        except Exception as e:
+            logger.error(f'Error getting user by email: {str(e)}')
+            return None
     
     @staticmethod
     def create(username: str, email: str, password: str):
         """Создать нового пользователя"""
-        users = UserRepository.get_all()
-        
-        # Проверка на существующего пользователя
-        if UserRepository.get_by_username(username):
-            raise ValueError('Пользователь с таким именем уже существует')
-        
-        if UserRepository.get_by_email(email):
-            raise ValueError('Пользователь с таким email уже существует')
-        
-        # Генерация ID
-        new_id = max([u.id for u in users], default=0) + 1
-        
-        # Создание пользователя
-        user = User(
-            id=new_id,
-            username=username,
-            email=email,
-            password_hash=User.hash_password(password),
-            created_at=datetime.now().isoformat()
-        )
-        
-        # Сохранение
-        users.append(user)
-        UserRepository._save_users(users)
-        
-        return user
-    
-    @staticmethod
-    def _save_users(users):
-        """Сохранить пользователей в файл"""
         try:
-            with open(USERS_FILE, 'w', encoding='utf-8') as f:
-                json.dump([{
-                    'id': u.id,
-                    'username': u.username,
-                    'email': u.email,
-                    'password_hash': u.password_hash,
-                    'created_at': u.created_at
-                } for u in users], f, indent=2, ensure_ascii=False)
-            return True
+            # Проверка на существующего пользователя
+            if UserRepository.get_by_username(username):
+                raise ValueError('Пользователь с таким именем уже существует')
+            
+            if UserRepository.get_by_email(email):
+                raise ValueError('Пользователь с таким email уже существует')
+            
+            # Хеширование пароля
+            password_hash = User.hash_password(password)
+            
+            # Создание пользователя
+            query = """
+                INSERT INTO users (username, email, password_hash) 
+                VALUES (%s, %s, %s)
+            """
+            user_id = db.execute_query(query, (username, email, password_hash))
+            
+            # Получаем созданного пользователя
+            user = UserRepository.get_by_id(user_id)
+            if not user:
+                raise ValueError('Ошибка при создании пользователя')
+            
+            logger.info(f'Created new user with ID: {user_id}')
+            return user
+            
+        except ValueError as e:
+            raise e
         except Exception as e:
-            logger.error(f'Error saving users: {str(e)}')
-            return False
+            logger.error(f'Error creating user: {str(e)}')
+            raise ValueError('Ошибка при создании пользователя')
     
     @staticmethod
     def authenticate(username: str, password: str):
         """Аутентификация пользователя"""
-        user = UserRepository.get_by_username(username)
-        if user and user.check_password(password):
-            return user
-        return None
+        try:
+            user = UserRepository.get_by_username(username)
+            if user and user.check_password(password):
+                return user
+            return None
+        except Exception as e:
+            logger.error(f'Error authenticating user: {str(e)}')
+            return None
+    
+    def get_user_profile(self, user_id):  
+        """Получить профиль пользователя"""
+        try:
+            query = """
+                SELECT id, username, email, first_name, gender, age, 
+                height_cm, weight_kg, target_weight_kg, bio, created_at, updated_at 
+                FROM users WHERE id = %s
+            """
+            result = self.db.execute_query(query, (user_id,))
+            if result and len(result) > 0:
+                return result[0]
+            return None
+        except Exception as e:
+            print(f"Error getting user profile: {e}")
+            return None
+
+
+    def update_user_profile(self, user_id, profile_data):  
+        """Обновить профиль пользователя"""
+        try:
+            query = """
+                UPDATE users SET 
+                first_name = %s,
+                gender = %s,
+                age = %s,
+                height_cm = %s,
+                weight_kg = %s,
+                target_weight_kg = %s,
+                bio = %s,
+                updated_at = CURRENT_TIMESTAMP
+                WHERE id = %s
+            """
+        
+            self.db.execute_query(query, (
+                profile_data.get('first_name'),
+                profile_data.get('gender'),
+                profile_data.get('age'),
+                profile_data.get('height_cm'),
+                profile_data.get('weight_kg'),
+                profile_data.get('target_weight_kg'),
+                profile_data.get('bio'),
+                user_id
+            ))
+            return True
+        except Exception as e:
+            print(f"Error updating user profile: {e}")
+            return False
+        
+

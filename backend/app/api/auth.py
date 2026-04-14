@@ -1,15 +1,19 @@
 from flask import Blueprint, request, jsonify
 from app.repositories.user_repository import UserRepository
 from app.services.jwt_service import JWTService
+from app.services.rbac_service import RBACService
 import logging
 
 logger = logging.getLogger(__name__)
 
-bp = Blueprint('auth', __name__)
+from app.api import bp
 
-@bp.route('/auth/register', methods=['POST'])
+@bp.route('/auth/register', methods=['POST', 'OPTIONS'])
 def register():
     """Регистрация нового пользователя"""
+    if request.method == 'OPTIONS':
+        return '', 200
+        
     try:
         data = request.json
         
@@ -29,11 +33,13 @@ def register():
         
         # Создание токена
         token = JWTService.create_token(user.id, user.username)
+        user_roles = RBACService.get_user_roles(user.id)
         
         return jsonify({
             'message': 'Пользователь успешно зарегистрирован',
             'user': user.to_dict(),
-            'token': token
+            'token': token,
+            'roles': user_roles
         }), 201
         
     except ValueError as e:
@@ -42,9 +48,12 @@ def register():
         logger.error(f'Error in register: {str(e)}')
         return jsonify({'error': 'Внутренняя ошибка сервера'}), 500
 
-@bp.route('/auth/login', methods=['POST'])
+@bp.route('/auth/login', methods=['POST', 'OPTIONS'])
 def login():
     """Аутентификация пользователя"""
+    if request.method == 'OPTIONS':
+        return '', 200
+        
     try:
         data = request.json
         
@@ -58,20 +67,25 @@ def login():
         
         # Создание токена
         token = JWTService.create_token(user.id, user.username)
+        user_roles = RBACService.get_user_roles(user.id)
         
         return jsonify({
             'message': 'Вход выполнен успешно',
             'user': user.to_dict(),
-            'token': token
+            'token': token,
+            'roles': user_roles 
         }), 200
         
     except Exception as e:
         logger.error(f'Error in login: {str(e)}')
         return jsonify({'error': 'Внутренняя ошибка сервера'}), 500
 
-@bp.route('/auth/verify', methods=['POST'])
+@bp.route('/auth/verify', methods=['POST', 'OPTIONS'])
 def verify_token():
     """Проверка валидности токена"""
+    if request.method == 'OPTIONS':
+        return '', 200
+        
     try:
         token = request.json.get('token')
         if not token:
@@ -80,14 +94,18 @@ def verify_token():
         payload = JWTService.verify_token(token)
         if not payload:
             return jsonify({'error': 'Невалидный токен'}), 401
+            
+        user_roles = RBACService.get_user_roles(payload['user_id'])
         
         return jsonify({
             'valid': True,
             'user': {
                 'user_id': payload['user_id'],
                 'username': payload['username']
-            }
+            },
+            'roles': user_roles
         }), 200
+        
         
     except Exception as e:
         logger.error(f'Error verifying token: {str(e)}')

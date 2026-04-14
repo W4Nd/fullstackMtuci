@@ -1,0 +1,80 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  # 1. Линтеры и Тесты
+  test-and-lint:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: test_db
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_pass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Backend
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install backend deps
+        working-directory: ./backend
+        run: pip install -r requirements.txt pytest ruff
+      - name: Lint backend
+        working-directory: ./backend
+        run: ruff check .
+      - name: Test backend
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgresql+asyncpg://test_user:test_pass@localhost:5432/test_db
+          JWT_SECRET_KEY: test_secret
+        run: pytest tests/ -v
+
+      # Frontend
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: 'npm'
+          cache-dependency-path: ./frontend/package-lock.json
+      - name: Install frontend deps
+        working-directory: ./frontend
+        run: npm ci
+      - name: Lint frontend
+        working-directory: ./frontend
+        run: npm run lint
+      - name: Test frontend
+        working-directory: ./frontend
+        run: npm run test:run # Проверь команду в package.json, возможно 'npm test'
+
+  # 2. Сборка образов
+  build-images:
+    needs: test-and-lint
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Backend
+        run: docker build -t backend:latest ./backend
+      - name: Build Frontend
+        run: docker build -t frontend:latest ./frontend
+      
+      # 3. Деплой (эмуляция)
+      - name: Deploy
+        run: echo "Images built successfully. Ready for production deploy."
