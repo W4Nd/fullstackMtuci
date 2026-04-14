@@ -15,7 +15,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "types": ["vitest/globals", "@testing-library/jest-dom", "vite/client"]  // ← ДОБАВИТЬ ЭТУ СТРОКУ
   },
   "include": ["src", "tests"],
   "references": [{ "path": "./tsconfig.node.json" }]
