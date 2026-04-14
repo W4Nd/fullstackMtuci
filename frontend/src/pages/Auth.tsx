@@ -56,7 +56,7 @@ const Auth: React.FC = () => {
                     password: formData.password,
                 };
                 
-                const data = await apiService.register(registerData);
+                await apiService.register(registerData);
                 
                 await login({ 
                     username: formData.username, 

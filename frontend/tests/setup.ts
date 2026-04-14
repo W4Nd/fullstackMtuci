@@ -1,7 +1,7 @@
 // frontend/tests/setup.ts
 import '@testing-library/jest-dom'
 import { cleanup } from '@testing-library/react'
-import { afterEach, vi, beforeEach, afterAll, beforeAll } from 'vitest'
+import { afterEach, vi, afterAll, beforeAll } from 'vitest'
 import { server } from './mocks/server'
 
 // Очищаем DOM после каждого теста
